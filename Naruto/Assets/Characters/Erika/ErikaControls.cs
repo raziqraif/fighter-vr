@@ -7,12 +7,15 @@ public class ErikaControls : MonoBehaviour
 {
     NavMeshAgent agent;
     GameObject player;
+    public GameObject arrow;
     Animator anim;
 
+    float waitTime = 0f;
+    
     // Start is called before the first frame update
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("MainCamera");
+        player = GameObject.FindGameObjectWithTag("Player");
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
     }
@@ -24,6 +27,8 @@ public class ErikaControls : MonoBehaviour
         {
             return;
         }
+
+        waitTime -= Time.deltaTime;
 
         transform.LookAt(new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z), Vector3.up);
 
@@ -59,7 +64,7 @@ public class ErikaControls : MonoBehaviour
                 agent.ResetPath();
                 agent.SetDestination(player.transform.position);
             }
-            if (agent.remainingDistance <= agent.stoppingDistance + 15)
+            else if (agent.remainingDistance <= agent.stoppingDistance + 15)
             {
                 //Debug.Log("Remaining distance");
                 if ((!agent.hasPath) || (agent.velocity.sqrMagnitude == 0f)
@@ -68,8 +73,40 @@ public class ErikaControls : MonoBehaviour
                     agent.ResetPath();
                     anim.SetBool("isRunRange", false);
                     anim.SetBool("isShootRange", true);
+                    if (waitTime <= 0)
+                    {
+                        ApplyForce();
+                        waitTime = 1.5f;
+                    }
+                    
                 }
             }
         }
     }
+
+    void ApplyForce()
+    {
+        Debug.Log("Arrow shot.");
+        GameObject newArrow = Instantiate(arrow, arrow.transform.position, arrow.transform.rotation);
+        newArrow.GetComponent<MeshRenderer>().enabled = true;
+        //newArrow.GetComponent<CapsuleCollider>().enabled = true;
+
+        transform.LookAt(new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z), Vector3.up);
+
+        Rigidbody targetBody = newArrow.GetComponent<Rigidbody>();
+
+        targetBody.velocity = transform.TransformDirection(Vector3.forward) * 40;
+
+        //targetBody.AddRelativeForce(transform.TransformDirection(Vector3.forward));
+        
+
+        //newArrow.GetComponent<MeshRenderer>().enabled = true;
+        //newArrow.transform.rotation = Quaternion.Euler(0, 0, 0);
+        //newArrow.transform.LookAt(player.transform);
+        //transform.LookAt(new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z), Vector3.up);
+
+        //newArrow.GetComponent<Rigidbody>().AddRelativeForce(newArrow.transform.forward * arrowShootForce);
+        //newArrow.GetComponent <Rigidbody> ().AddRelativeForce((player.transform.position - arrow.transform.position));
+    }
+
 }

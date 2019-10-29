@@ -1,0 +1,218 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Valve.VR;
+
+public class Hand : MonoBehaviour
+{
+    // Kunais (18 MAX)
+    public GameObject kunai1; public GameObject kunai2; public GameObject kunai3;
+    public GameObject kunai4; public GameObject kunai5; public GameObject kunai6;
+    public GameObject kunai7; public GameObject kunai8; public GameObject kunai9;
+    public GameObject kunai10; public GameObject kunai11; public GameObject kunai12;
+    public GameObject kunai13; public GameObject kunai14; public GameObject kunai15;
+    public GameObject kunai16; public GameObject kunai17; public GameObject kunai18;
+
+    // Wind Shuriken ( 3 MAX )
+    public GameObject shuriken1; public GameObject shuriken2; public GameObject shuriken3;
+
+    // Kunai setup
+    public GameObject[] kunais;
+    public int currentKunai;
+
+    // Shuriken setup
+    public GameObject[] shurikens;
+    public int currentShuriken;
+
+    // Trigger
+    public SteamVR_Action_Boolean m_GrabAction = null;
+
+    // Middle Button
+    public SteamVR_Action_Boolean m_MidButton = null;
+
+    // Controller stuff
+    private SteamVR_Behaviour_Pose m_Pose = null;
+    private FixedJoint m_Joint = null;
+
+    
+    // Start is called before the first frame update
+    private void Awake()
+    {
+        // set up kunais
+        currentKunai = 0;
+
+        kunai1 = GameObject.Find("kunai-1");
+        kunai2 = GameObject.Find("kunai-2"); 
+        kunai3 = GameObject.Find("kunai-3"); 
+        kunai4 = GameObject.Find("kunai-4"); 
+        kunai5 = GameObject.Find("kunai-5"); 
+        kunai6 = GameObject.Find("kunai-6");
+        kunai7 = GameObject.Find("kunai-7");
+        kunai8 = GameObject.Find("kunai-8");
+        kunai9 = GameObject.Find("kunai-9");
+        kunai10 = GameObject.Find("kunai-10");
+        kunai11 = GameObject.Find("kunai-11");
+        kunai12 = GameObject.Find("kunai-12");
+        kunai13 = GameObject.Find("kunai-13");
+        kunai14 = GameObject.Find("kunai-14");
+        kunai15 = GameObject.Find("kunai-15");
+        kunai16 = GameObject.Find("kunai-16");
+        kunai17 = GameObject.Find("kunai-17");
+        kunai18 = GameObject.Find("kunai-18");
+
+        kunais = new GameObject[18] { kunai1, kunai2, kunai3, kunai4, kunai5, kunai6,
+                                     kunai7, kunai8, kunai9, kunai10, kunai11, kunai12,
+                                     kunai13, kunai14, kunai15, kunai16, kunai17, kunai18 };
+
+        print("Init Kun Length: " + kunais.Length);
+
+        // set up Shuriken
+        currentKunai = 0;
+
+        shuriken1 = GameObject.Find("Shuriken-1");
+        shuriken2 = GameObject.Find("Shuriken-2");
+        shuriken3 = GameObject.Find("Shuriken-3");
+
+        shurikens = new GameObject[3] { shuriken1, shuriken2, shuriken3 };
+    
+
+        print("Init Kun Length: " + kunais.Length);
+        print("Init Shur Length: " + shurikens.Length);
+
+        m_Pose = GetComponent<SteamVR_Behaviour_Pose>();
+        m_Joint = GetComponent<FixedJoint>();
+    }
+
+    // Update is called once per frame
+    private void Update()
+    {
+        // trigger down
+        if (m_GrabAction.GetStateDown(m_Pose.inputSource))
+        {
+            print(m_Pose.inputSource + " Trigger Down");
+            Aim();
+        }
+
+        // Mid button down
+        if (m_MidButton.GetStateDown(m_Pose.inputSource))
+        {
+            print(m_Pose.inputSource + " MidButton Down");
+            holdShuriken();
+        }
+
+        // trigger up
+        if (m_GrabAction.GetStateUp(m_Pose.inputSource))
+        {
+            print(m_Pose.inputSource + " Trigger Up");
+            Shoot();
+        }
+
+        // Mid button up
+        if (m_MidButton.GetStateUp(m_Pose.inputSource))
+        {
+            print(m_Pose.inputSource + " MidButton Up");
+            throwShuriken();
+        }
+
+    }
+
+   
+    public void Aim()
+    {
+        // returns kunai # we're on and set curr kunai var | Increment KunaiCount
+        currentKunai = getKunaiCount();
+
+        print("CurrKunai: " + currentKunai);
+        print("Length: " + kunais.Length);
+
+        // Attaches kunai to hand
+        kunais[currentKunai].transform.position = transform.position;
+        kunais[currentKunai].transform.rotation = transform.rotation;
+
+        kunais[currentKunai].transform.Rotate(90, 0, 0);
+
+        Debug.Log(transform.eulerAngles);
+
+        Rigidbody targetBody = kunais[currentKunai].GetComponent<Rigidbody>();
+        m_Joint.connectedBody = targetBody;
+    }
+
+    public void Shoot()
+    {
+        //Vector3 fwd = transform.TransformDirection(Vector3.forward);
+
+        Rigidbody targetBody = kunais[currentKunai].GetComponent<Rigidbody>();
+
+        targetBody.velocity = transform.TransformDirection(Vector3.forward) * 20;
+
+        //targetBody.AddRelativeForce(transform.TransformDirection(Vector3.forward));
+
+        m_Joint.connectedBody = null;
+
+        currentKunai++;
+    }
+
+
+    // Returns what Kunai Number we are on
+    public int getKunaiCount()
+    {
+        if (currentKunai < kunais.Length)
+        {
+            return currentKunai;
+        } else
+        {
+            currentKunai = 0;
+            return 0;
+        }
+        
+    }
+
+    public void holdShuriken()
+    {
+        // returns kunai # we're on and set curr kunai var | Increment KunaiCount
+        currentShuriken = getShurikenCount();
+
+        print("currShur: " + currentShuriken);
+        print("Length: " + shurikens.Length);
+
+        // Attaches kunai to hand
+        shurikens[currentShuriken].transform.position = transform.position;
+        shurikens[currentShuriken].transform.rotation = transform.rotation;
+
+        shurikens[currentShuriken].transform.Rotate(90, 0, 0);
+
+
+        Debug.Log(transform.eulerAngles);
+
+        Rigidbody targetBody = shurikens[currentShuriken].GetComponent<Rigidbody>();
+        m_Joint.connectedBody = targetBody;
+    }
+
+    public void throwShuriken()
+    {
+        
+        Rigidbody targetBody = shurikens[currentShuriken].GetComponent<Rigidbody>();
+        targetBody.velocity = m_Pose.GetVelocity() * 5.0f;
+        targetBody.angularVelocity = m_Pose.GetAngularVelocity();
+
+        
+        m_Joint.connectedBody = null;
+
+        currentShuriken++;
+    }
+
+    public int getShurikenCount()
+    {
+        if (currentShuriken < shurikens.Length)
+        {
+            return currentShuriken;
+        }
+        else
+        {
+            currentShuriken = 0;
+            return 0;
+        }
+
+    }
+
+}

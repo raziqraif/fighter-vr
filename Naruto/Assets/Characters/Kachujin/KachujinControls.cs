@@ -13,7 +13,7 @@ public class KachujinControls : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("MainCamera");
+        player = GameObject.FindGameObjectWithTag("Player");
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
     }
@@ -30,7 +30,7 @@ public class KachujinControls : MonoBehaviour
         transform.LookAt(new Vector3(player.transform.position.x, transform.position.y, player.transform.position.z), Vector3.up);
 
 
-        if ((Vector3.Distance(transform.position, player.transform.position) > 5f) && (!agent.pathPending) && (!agent.hasPath))
+        if ((Vector3.Distance(transform.position, player.transform.position) > 4f) && (!agent.pathPending) && (!agent.hasPath))
         {
             Debug.Log("Set distance");
             setAnimationParameter("running");
@@ -42,16 +42,16 @@ public class KachujinControls : MonoBehaviour
         {
             if (!anim.GetBool("running"))
             {
-                Debug.Log("Bool running");
+                //Debug.Log("Bool running");
                 setAnimationParameter("running");
             }
         }
 
         if (!agent.pathPending)
         {
-            if (agent.remainingDistance <= agent.stoppingDistance + 2f)
+            if (agent.remainingDistance <= agent.stoppingDistance + 1f)
             {
-                Debug.Log("Kachujin: Remaining distance");
+                //Debug.Log("Kachujin: Remaining distance");
                 if ((!agent.hasPath) || (agent.velocity.sqrMagnitude == 0f)
                     || (agent.nextPosition == agent.transform.position))
                 {
@@ -59,7 +59,7 @@ public class KachujinControls : MonoBehaviour
                     setAnimationParameter(attackList[new System.Random().Next(0, 3)]);
                 }
             }
-            Debug.Log("Kachujin" + anim.GetBool("running"));
+            //Debug.Log("Kachujin" + anim.GetBool("running"));
              
        }
     }

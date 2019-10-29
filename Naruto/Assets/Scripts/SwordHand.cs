@@ -1,0 +1,73 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Valve.VR;
+
+
+public class SwordHand : MonoBehaviour
+{
+
+    // Sword (1 MAX)
+    public GameObject Sword;
+    public GameObject WeaponHideLocation;
+
+    // Trigger
+    public SteamVR_Action_Boolean m_GrabAction = null;
+
+    // Controller stuff
+    private SteamVR_Behaviour_Pose m_Pose = null;
+    private FixedJoint m_Joint = null;
+
+    // Awake is called before the first frame update
+    private void Awake()
+    {
+        Sword = GameObject.Find("Sword");   
+
+        m_Pose = GetComponent<SteamVR_Behaviour_Pose>();
+        m_Joint = GetComponent<FixedJoint>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+        // trigger down
+        if (m_GrabAction.GetStateDown(m_Pose.inputSource))
+        {
+            print(m_Pose.inputSource + " Trigger Down");
+            holdSword();
+        }
+
+        // trigger up
+        if (m_GrabAction.GetStateUp(m_Pose.inputSource))
+        {
+            print(m_Pose.inputSource + " Trigger Up");
+            releaseSword();
+        }
+    }
+
+    // holdSword()
+    public void holdSword()
+    {
+        // Attaches Sword to hand
+        Sword.transform.position = transform.position;
+        Sword.transform.rotation = transform.rotation;
+        
+        Debug.Log(transform.eulerAngles);
+
+        Rigidbody targetBody = Sword.GetComponent<Rigidbody>();
+        m_Joint.connectedBody = targetBody;
+    }
+
+    // releaseSword()
+    public void releaseSword()
+    {
+        // Relocate Sword to hand
+        Sword.transform.position = new Vector3(10.0f, 10.0f, 10.0f);
+
+
+        m_Joint.connectedBody = null;
+        
+    }
+
+}
